@@ -1,0 +1,322 @@
+{
+	"info": {
+		"_postman_id": "1520bc0a-f30e-4f9b-8cb9-aff1e41802e7",
+		"name": "Artem Kasian Test Assignment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17606668"
+	},
+	"item": [
+		{
+			"name": "Create Pet",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const random = Math.floor(Math.random() * 100000);\r",
+							"pm.environment.set(\"petID\", random);\r",
+							"\r",
+							"const name = pm.variables.replaceIn(\"{{$randomFirstName}}\"); // saves generated name to the variable\r",
+							"pm.environment.set(\"savedName\", name);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let currentResponse = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response PetID corresponds to the one generated before request\", function () {\r",
+							"    const petID = pm.environment.get(\"petID\");\r",
+							"    pm.expect(currentResponse.id).to.equal(petID);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response pet name corresponds to the variable saved before request\", function(){\r",
+							"    const savedName = pm.environment.get(\"savedName\");\r",
+							"    pm.expect(currentResponse.name).to.equal(savedName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response time is below 1000ms\", function(){\r",
+							"    const currentResponseTime = pm.response.responseTime;\r",
+							"    pm.expect(currentResponseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains all main keys\", function(){\r",
+							"    pm.expect(currentResponse).to.have.all.keys(\"id\", \"name\", \"category\", \"photoUrls\", \"tags\", \"status\")\r",
+							"});\r",
+							"\r",
+							"// pm.test(\"Successful POST request\", function () {\r",
+							"//     pm.expect(pm.response.code).to.be.oneOf([201, 202]); //200 OK is returned instead\r",
+							"// });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": {{petID}},\r\n  \"category\": {\r\n    \"id\": 1,\r\n    \"name\": \"cat\" //left for manual input\r\n  },\r\n  \"name\": \"{{savedName}}\",\r\n  \"photoUrls\": [\r\n    \"{{$randomAvatarImage}}\"\r\n  ],\r\n  \"tags\": [\r\n    {\r\n      \"id\": {{$randomInt}},\r\n      \"name\": \"{{$randomLoremWord}}\"\r\n    }\r\n  ],\r\n  \"status\": \"{{pendingStatus}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/pet",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"pet"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Pet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let currentResponse = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response PetID corresponds to the one generated before request\", function () {\r",
+							"    const petID = pm.environment.get(\"petID\");\r",
+							"    pm.expect(currentResponse.id).to.equal(petID);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response pet name corresponds to the variable saved before request\", function(){\r",
+							"    const savedName = pm.environment.get(\"savedName\");\r",
+							"    pm.expect(currentResponse.name).to.equal(savedName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response time is below 1000ms\", function(){\r",
+							"    const currentResponseTime = pm.response.responseTime;\r",
+							"    pm.expect(currentResponseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains all main keys\", function(){\r",
+							"    pm.expect(currentResponse).to.have.all.keys(\"id\", \"name\", \"category\", \"photoUrls\", \"tags\", \"status\")\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/pet/{{petID}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"pet",
+						"{{petID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Pet",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let initialName = pm.variables.get(\"savedName\");\r",
+							"let updatedName = initialName + \" | updated\";\r",
+							"pm.environment.set(\"updatedName\", updatedName);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let currentResponse = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response PetID is the same as it was in request\", function () {\r",
+							"    const petID = pm.environment.get(\"petID\");\r",
+							"    pm.expect(currentResponse.id).to.equal(petID);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response updated pet-name corresponds to the variable saved before request\", function(){\r",
+							"    const newName = pm.environment.get(\"updatedName\");\r",
+							"    pm.expect(currentResponse.name).to.equal(newName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains all main keys\", function(){\r",
+							"    pm.expect(currentResponse).to.have.all.keys(\"id\", \"name\", \"category\", \"photoUrls\", \"tags\", \"status\")\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Data types are correct after upodate\", function () {\r",
+							"    pm.expect(currentResponse.name).to.be.a(\"string\");\r",
+							"    pm.expect(currentResponse.id).to.be.a(\"number\");\r",
+							"    pm.expect(currentResponse.photoUrls).to.be.an(\"array\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": {{petID}},\r\n  \"category\": {\r\n    \"id\":  {{$randomInt}},\r\n    \"name\": \"cat\" //left for manual input\r\n  },\r\n  \"name\": \"{{updatedName}}\", //updated via pre-script name\r\n  \"photoUrls\": [\r\n    \"{{$randomAvatarImage}}\"\r\n  ],\r\n  \"tags\": [\r\n    {\r\n      \"id\": {{$randomInt}},\r\n      \"name\": \"{{$randomLoremWord}} | updated\" //additional \"updated\" label for objectivity\r\n    }\r\n  ],\r\n  \"status\": \"{{soldStatus}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/pet",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"pet"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Pet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/pet/{{petID}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"pet",
+						"{{petID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Deleted Pet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status code name has string\", function () {\r",
+							"    pm.response.to.have.status(\"Not Found\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/pet/{{petID}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"pet",
+						"{{petID}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
